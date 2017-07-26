@@ -42,7 +42,9 @@ ln -sf $JAVA_HOME jni/java_home
 
 # Build JNI binaries and move them to the appropriate location.
 if python -mplatform | grep -iq 'darwin'; then
-	bazel build -c opt neuralccg:libdecoder.dylib
+	# Bazel issue 2610 - sandboxed rules broken on macos when output_base and workspace have differing case sensitivity
+	# https://github.com/bazelbuild/bazel/issues/2610
+	bazel build -c opt neuralccg:libdecoder.dylib --strategy=CppCompile=standalone
 
 	rm -f $lib_dir/libdecoder.dylib
 	cp bazel-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.dylib

@@ -6,5 +6,6 @@ cc_library(
     includes = [
         "java_home/include",
         "java_home/include/linux",
+        "java_home/include/darwin",
     ],
 )

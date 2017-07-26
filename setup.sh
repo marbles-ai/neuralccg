@@ -41,7 +41,7 @@ rm -f jni/java_home
 ln -sf $JAVA_HOME jni/java_home
 
 # Build JNI binaries and move them to the appropriate location.
-if python -mplatform grep -iq 'darwin'; then
+if python -mplatform | grep -iq 'darwin'; then
 	bazel build -c opt neuralccg:libdecoder.dylib
 
 	rm -f $lib_dir/libdecoder.dylib

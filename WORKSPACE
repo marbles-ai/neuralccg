@@ -1,3 +1,16 @@
+http_archive(
+	name = "com_github_nelhage_boost",
+	#sha256 = ""
+	strip_prefix = "rules_boost-master",
+	type = "zip",
+	urls = [
+		"https://github.com/nelhage/rules_boost/archive/master.zip"
+	],
+)
+
+load("@com_github_nelhage_boost//:boost/boost.bzl", "boost_deps")
+boost_deps()
+
 git_repository(
     name = "protobuf",
     remote = "https://github.com/google/protobuf.git",

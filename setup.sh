@@ -41,10 +41,21 @@ rm -f jni/java_home
 ln -sf $JAVA_HOME jni/java_home
 
 # Build JNI binaries and move them to the appropriate location.
-bazel build -c opt neuralccg:libdecoder.so
+if python -mplatform grep -iq 'darwin'; then
+	bazel build -c opt neuralccg:libdecoder.dylib
 
-rm -f $lib_dir/libdecoder.so
-cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.so
+	rm -f $lib_dir/libdecoder.dylib
+	cp bazel-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.dylib
 
-rm -f $lib_dir/libdecoder.jnilib
-cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.jnilib
+	rm -f $lib_dir/libdecoder.jnilib
+	cp bazel-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.jnilib
+else
+	bazel build -c opt neuralccg:libdecoder.so
+
+	rm -f $lib_dir/libdecoder.so
+	cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.so
+
+	rm -f $lib_dir/libdecoder.jnilib
+	cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.jnilib
+fi
+

@@ -11,6 +11,18 @@ cc_proto_library(
 )
 
 cc_binary(
+    name = "libdecoder.dylib",
+    srcs = ["decoder.h",
+            "decoder.cc"],
+    linkshared = 1,
+    deps = [
+        "//neuralccg/model:rnn-parse-scorer",
+        "//util:delimited-proto-reader",
+        "//jni:jni",
+    ],
+)
+
+cc_binary(
     name = "libdecoder.so",
     srcs = ["decoder.h",
             "decoder.cc"],
@@ -21,3 +33,4 @@ cc_binary(
         "//jni:jni",
     ],
 )
+

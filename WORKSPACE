@@ -1,10 +1,10 @@
 http_archive(
 	name = "com_github_nelhage_boost",
 	#sha256 = ""
-	strip_prefix = "rules_boost-master",
+	strip_prefix = "rules_boost-0838fdac246ef9362b80009b9dd2018b5378a5ed",
 	type = "zip",
 	urls = [
-		"https://github.com/nelhage/rules_boost/archive/master.zip"
+		"https://github.com/nelhage/rules_boost/archive/0838fdac246ef9362b80009b9dd2018b5378a5ed.zip"
 	],
 )
 

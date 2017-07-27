@@ -1,7 +1,9 @@
 #/bin/bash
 
 # Fail if we reference any unbound environment variables.
-set -u
+# PWG: we infer JAVA_HOME on ubuntu so cannot do this
+#set -u
+#set -eo pipefail
 
 # Check if external data needs to be downloaded.
 resource_url=lil.cs.washington.edu/resources
@@ -38,26 +40,37 @@ else
 fi
 
 rm -f jni/java_home
+# Infer JAVA_HOME if we can 
+python -mplatform | grep -iq 'ubuntu' \
+    && [ "x$JAVA_HOME" == "x" ] \
+    && JAVA_HOME=$(update-alternatives --query java | grep 'Value: ' | grep -o '/.*/jre' | sed 's/jre$//g') \
+    && echo "Inferred JAVA_HOME=$JAVA_HOME"
+# TODO: need location based on os
 ln -sf $JAVA_HOME jni/java_home
 
 # Build JNI binaries and move them to the appropriate location.
 if python -mplatform | grep -iq 'darwin'; then
 	# Bazel issue 2610 - sandboxed rules broken on macos when output_base and workspace have differing case sensitivity
+	# I think this is the same issue even though I have a single filesystem - osx defaults to case insensitive
 	# https://github.com/bazelbuild/bazel/issues/2610
-	bazel build -c opt neuralccg:libdecoder.dylib --strategy=CppCompile=standalone
-
-	rm -f $lib_dir/libdecoder.dylib
-	cp bazel-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.dylib
+	bazel build -c opt neuralccg:libdecoder.dylib --strategy=CppCompile=standalone --symlink_prefix=darwin- $*
 
 	rm -f $lib_dir/libdecoder.jnilib
-	cp bazel-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.jnilib
+	rm -f $lib_dir/libdecoder.dylib
+	cp darwin-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.dylib
+	cp darwin-bin/neuralccg/libdecoder.dylib $lib_dir/libdecoder.jnilib
+
+	# Now build ubuntu version in a docker container
+	docker build -t neuralccg .
+
+	# Need standalong because we mount osx filesystem on /root 
+	docker run -v $PWD:/root --rm -it neuralccg /bin/bash -c ./setup.sh --strategy=CppCompile=standalone 
 else
-	bazel build -c opt neuralccg:libdecoder.so
+	bazel build -c opt neuralccg:libdecoder.so --symlink_prefix=linux- $*
 
 	rm -f $lib_dir/libdecoder.so
-	cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.so
-
-	rm -f $lib_dir/libdecoder.jnilib
-	cp bazel-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.jnilib
+	# On linux JNI will load .so so we can package .so for linux and .jnilib for osx
+	# in a single jar
+	cp linux-bin/neuralccg/libdecoder.so $lib_dir/libdecoder.so
 fi
 

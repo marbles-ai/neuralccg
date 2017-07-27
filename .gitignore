@@ -3,5 +3,21 @@ bazel-genfiles
 bazel-neuralccg
 bazel-out
 bazel-testlogs
+# Linux symlinks
+linux-bin
+linux-genfiles
+linux-neuralccg
+linux-out
+linux-testlogs
+# OSX symlinks
+darwin-bin
+darwin-genfiles
+darwin-neuralccg
+darwin-out
+darwin-testlogs
 jni/java_home
+# OSX Finder
 .DS_Store
+# Build in docker with mount on PWD adds these
+.bash_history
+.cache
